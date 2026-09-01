@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  INCIDENTS, Incident, Mode, Phase, PIPELINE_STAGES,
-} from "../data/incidents";
+import { INCIDENTS, Incident, Phase, PIPELINE_STAGES } from "../data/incidents";
 
 export interface TimelineEntry {
   time: string;
@@ -16,7 +14,7 @@ export interface AuditEntry {
   actor: string;
   action: string;
   detail: string;
-  mode: Mode;
+  mode: string;
 }
 
 export interface Runtime {
@@ -37,7 +35,6 @@ export interface Runtime {
 }
 
 const nowTime = () => new Date().toTimeString().slice(0, 8);
-
 const rnd = (min: number, max: number) => min + Math.random() * (max - min);
 
 function nextTraffic(inc: Incident, phase: Phase, last: number): number {
@@ -99,22 +96,16 @@ export function fakeSha256(seed: string): string {
 }
 
 const SEED_AUDIT: Omit<AuditEntry, "id">[] = [
-  { time: "00:25:36", incident: "INC-20260901-000187", actor: "CIC", action: "PLAYBOOK_RECOMMENDATION", detail: "PB-DDOS-01 — confidence 0.974 — risk LOW — mode TRAINING", mode: "TRAINING" },
-  { time: "00:25:22", incident: "INC-20260901-000187", actor: "SIMULATION_ANALYST", action: "SIMULATION_COMPLETED", detail: "effectiveness 0.96 — collateral LOW — reversibility HIGH", mode: "TRAINING" },
-  { time: "00:25:21", incident: "INC-20260901-000187", actor: "PLAYBOOK_SELECTOR", action: "PLAYBOOK_MATCHED", detail: "PB-DDOS-01 (96 %) > PB-WAF-02 (88 %) > PB-BOT-07 (64 %)", mode: "TRAINING" },
-  { time: "00:25:19", incident: "INC-20260901-000187", actor: "MITRE_MAPPER", action: "MITRE_MAPPING", detail: "TA0040 Impact / T1498 / T1498.001", mode: "TRAINING" },
-  { time: "00:25:17", incident: "INC-20260901-000187", actor: "COUNTER_ANALYST", action: "CHALLENGE_RAISED", detail: "contre-hypothèse « pic légitime » 11.1 % — 2 éléments contradictoires", mode: "TRAINING" },
-  { time: "00:25:12", incident: "INC-20260901-000187", actor: "CIC", action: "ANALYSIS_STARTED", detail: "pipeline cognitif 20 stages — 12 agents mobilisés", mode: "TRAINING" },
-  { time: "00:25:08", incident: "INC-20260901-000187", actor: "DETECTION_ANALYST", action: "INCIDENT_CREATED", detail: "corrélation WAF + LB + CDN — seuil req/s ×9", mode: "TRAINING" },
+  { time: "00:25:12", incident: "INC-20260901-000187", actor: "CIC", action: "ANALYSIS_STARTED", detail: "pipeline cognitif 20 stages — 12 agents mobilisés", mode: "PRODUCTION" },
+  { time: "00:25:08", incident: "INC-20260901-000187", actor: "DETECTION_ANALYST", action: "INCIDENT_CREATED", detail: "corrélation WAF + LB + CDN — seuil req/s ×9", mode: "PRODUCTION" },
   { time: "00:15:06", incident: "INC-20260901-000172", actor: "POLICY_GUARD", action: "APPROVAL_GATE_ARMED", detail: "double validation requise (L1 + L2) — FAIL CLOSED", mode: "PRODUCTION" },
-  { time: "00:15:05", incident: "INC-20260901-000172", actor: "SIMULATION_ANALYST", action: "SIMULATION_COMPLETED", detail: "PB-AUTH-03 — effectiveness 0.92 — collateral MEDIUM", mode: "PRODUCTION" },
+  { time: "00:15:05", incident: "INC-20260901-000172", actor: "CONSEQUENCE_MODELER", action: "MODELING_COMPLETED", detail: "PB-AUTH-03 — effectiveness 0.92 — collateral MEDIUM", mode: "PRODUCTION" },
   { time: "00:14:52", incident: "INC-20260901-000172", actor: "DETECTION_ANALYST", action: "INCIDENT_CREATED", detail: "IdP — 18 400 tentatives / 9 min — ratio échec 96 %", mode: "PRODUCTION" },
-  { time: "00:05:00", incident: "—", actor: "CIC", action: "SYSTEM_READY", detail: "Policy Guard armé — fail closed — LLM sans privilège d'exécution", mode: "PRODUCTION" },
   { time: "00:05:01", incident: "—", actor: "POLICY_GUARD", action: "MODE_ARMED", detail: "PRODUCTION — double validation humaine obligatoire — aucune auto-exécution", mode: "PRODUCTION" },
+  { time: "00:05:00", incident: "—", actor: "CIC", action: "SYSTEM_READY", detail: "Policy Guard armé — fail closed — LLM sans privilège d'exécution", mode: "PRODUCTION" },
 ];
 
 export function useCIC() {
-  const [mode, setModeState] = useState<Mode>("PRODUCTION");
   const [runtimes, setRuntimes] = useState<Record<string, Runtime>>(() => {
     const m: Record<string, Runtime> = {};
     INCIDENTS.forEach((i) => { m[i.id] = seedRuntime(i); });
@@ -124,12 +115,10 @@ export function useCIC() {
     SEED_AUDIT.map((e, idx) => ({ ...e, id: 1000 - idx }))
   );
 
-  const modeRef = useRef(mode);
   const rtRef = useRef(runtimes);
   const timers = useRef<number[]>([]);
   const auditId = useRef(2000);
 
-  useEffect(() => { modeRef.current = mode; }, [mode]);
   useEffect(() => { rtRef.current = runtimes; }, [runtimes]);
   useEffect(() => () => { timers.current.forEach((t) => window.clearTimeout(t)); }, []);
 
@@ -148,9 +137,9 @@ export function useCIC() {
     }));
   }, []);
 
-  const pushAudit = useCallback((incident: string, actor: string, action: string, detail: string, m?: Mode) => {
+  const pushAudit = useCallback((incident: string, actor: string, action: string, detail: string) => {
     setAudit((prev) => [
-      { id: ++auditId.current, time: nowTime(), incident, actor, action, detail, mode: m ?? modeRef.current },
+      { id: ++auditId.current, time: nowTime(), incident, actor, action, detail, mode: "PRODUCTION" },
       ...prev,
     ]);
   }, []);
@@ -185,7 +174,7 @@ export function useCIC() {
       );
     }
 
-    const t = (stage: number) => Math.max(0, (stage - from)) * STEP + 150;
+    const t = (stage: number) => Math.max(0, stage - from) * STEP + 150;
     const conf = (inc.confidenceFactors.reduce((s, f) => s + f.weight * f.value, 0) * 100).toFixed(1);
     const h0 = inc.hypotheses[0];
     const h1 = inc.hypotheses[inc.hypotheses.length - 1];
@@ -200,7 +189,7 @@ export function useCIC() {
       pushAudit(inc.id, "COUNTER_ANALYST", "CHALLENGE_RAISED", `${inc.evidenceAgainst.length} éléments contradictoires examinés`);
     }));
     if (7 >= from) after(t(7), () => guarded(inc.id, epoch, () =>
-      pushAudit(inc.id, "CIC", "CONFIDENCE_SCORED", `confidence ${(conf)} % — pondération 6 facteurs`)));
+      pushAudit(inc.id, "CIC", "CONFIDENCE_SCORED", `confidence ${conf} % — pondération déterministe 6 facteurs`)));
     if (8 >= from) after(t(8), () => guarded(inc.id, epoch, () => {
       addTimeline(inc.id, `MITRE mapping : ${inc.mitre.tactic} / ${inc.mitre.technique}`, "ai");
       pushAudit(inc.id, "MITRE_MAPPER", "MITRE_MAPPING", `${inc.mitre.tactic} ${inc.mitre.tacticName} / ${inc.mitre.technique} / ${inc.mitre.sub}`);
@@ -215,34 +204,19 @@ export function useCIC() {
       setRuntimes((prev) => ({ ...prev, [inc.id]: { ...prev[inc.id], phase: "PLAYBOOK_SELECTED" } }));
     }));
     if (12 >= from) after(t(12), () => guarded(inc.id, epoch, () => {
-      addTimeline(inc.id, `Simulation : efficacité ${pb.sim.effectiveness} % — risque collatéral ${pb.sim.collateral}`, "sim");
-      pushAudit(inc.id, "SIMULATION_ANALYST", "SIMULATION_COMPLETED", `${pb.id} — SANDBOX ONLY — aucune action réelle`);
+      addTimeline(inc.id, `Modélisation pré-exécution : efficacité ${pb.sim.effectiveness} % — risque collatéral ${pb.sim.collateral}`, "sim");
+      pushAudit(inc.id, "CONSEQUENCE_MODELER", "MODELING_COMPLETED", `${pb.id} — ESTIMATE ONLY — aucune exécution à ce stade`);
     }));
 
     const total = (PIPELINE_STAGES.length - from) * STEP + 350;
     after(total, () => guarded(inc.id, epoch, () => {
       patch(inc.id, { running: false, phase: "WAITING_APPROVAL" });
-      addTimeline(inc.id, "Human Approval Gate armé — double validation requise", "warn");
+      addTimeline(inc.id, "Human Approval Gate armé — double validation humaine obligatoire (L1 + L2)", "warn");
       pushAudit(inc.id, "POLICY_GUARD", "APPROVAL_GATE_ARMED", "RBAC + périmètre + limites de commande vérifiés — FAIL CLOSED");
-      scheduleAutoGrant(inc.id, epoch);
     }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [after, addTimeline, guarded, patch, pushAudit]);
 
-  const scheduleAutoGrant = useCallback((id: string, epoch: number) => {
-    after(2100, () => {
-      const rt = rtRef.current[id];
-      if (!rt || rt.epoch !== epoch) return;
-      if (rt.phase !== "WAITING_APPROVAL" || rt.l1 || rt.rejected) return;
-      if (modeRef.current !== "TRAINING") return;
-      addTimeline(id, "TRAINING authorization granted — exécution simulée", "sim");
-      pushAudit(id, "POLICY_GUARD", "AUTHORIZATION_GRANTED", "auto-approbation TRAINING — SIMULATION / NO EXTERNAL ACTION");
-      after(900, () => guarded(id, epoch, () => execute(id)));
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [after, addTimeline, guarded, pushAudit]);
-
-  /* ---------------- exécution ---------------- */
+  /* ---------------- exécution réelle ---------------- */
 
   const execute = useCallback((id: string) => {
     const rt = rtRef.current[id];
@@ -251,7 +225,7 @@ export function useCIC() {
     const inc = INCIDENTS.find((i) => i.id === id)!;
     const pb = inc.playbooks[rt.playbookIndex];
     patch(id, { phase: "MITIGATING" });
-    addTimeline(id, `Playbook démarré — ${pb.id} (${modeRef.current === "TRAINING" ? "exécution simulée" : "exécution autorisée"})`, "sim");
+    addTimeline(id, `Playbook démarré — ${pb.id} — exécution autorisée sur systèmes réels`, "warn");
     pushAudit(id, "EXECUTION_ENGINE", "EXECUTION_START", `${pb.id} — deterministic executor — privilèges RESTRICTED`);
 
     after(6500, () => guarded(id, epoch, () => {
@@ -278,7 +252,6 @@ export function useCIC() {
         patch(id, { phase: "RECOVERED", sealed: true, score: inc.baseScore });
       }));
     }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [after, addTimeline, guarded, patch, pushAudit]);
 
   /* ---------------- approbations humaines ---------------- */
@@ -334,11 +307,11 @@ export function useCIC() {
   const selectPlaybook = useCallback((id: string, index: number) => {
     const rt = rtRef.current[id];
     const inc = INCIDENTS.find((i) => i.id === id)!;
-    if (!rt || index === rt.playbookIndex || index >= inc.playbooks.length) return;
-    const prevIdx = rt.playbookIndex;
+    if (!rt || rt.phase !== "WAITING_APPROVAL") return;
+    if (index === rt.playbookIndex || index >= inc.playbooks.length) return;
     patch(id, { playbookIndex: index, l1: false, l2: false });
-    addTimeline(id, `Playbook modifié : ${inc.playbooks[index].id} — approbations réinitialisées`, "sim");
-    pushAudit(id, "HUMAN · SOC ANALYST", "PLAYBOOK_MODIFIED", `${inc.playbooks[prevIdx].id} → ${inc.playbooks[index].id}`);
+    addTimeline(id, `Playbook sélectionné par l'opérateur : ${inc.playbooks[index].id} — approbations réinitialisées`, "sim");
+    pushAudit(id, "HUMAN · SOC ANALYST", "PLAYBOOK_SELECTED", `${inc.playbooks[rt.playbookIndex].id} → ${inc.playbooks[index].id}`);
   }, [addTimeline, patch, pushAudit]);
 
   const closeIncident = useCallback((id: string) => {
@@ -346,47 +319,8 @@ export function useCIC() {
     if (!rt || rt.phase !== "RECOVERED") return;
     patch(id, { phase: "CLOSED" });
     addTimeline(id, "Incident clos — surveillance renforcée maintenue 24 h", "sys");
-    pushAudit(id, "CIC", "INCIDENT_CLOSED", "closure définitive après fenêtre d'observation");
+    pushAudit(id, "CIC", "INCIDENT_CLOSED", "clôture définitive après fenêtre d'observation");
   }, [addTimeline, patch, pushAudit]);
-
-  const replay = useCallback((id: string) => {
-    if (modeRef.current !== "TRAINING") {
-      pushAudit(id, "POLICY_GUARD", "REPLAY_DENIED", "rejeu autorisé en TRAINING uniquement — DENY");
-      return;
-    }
-    const inc = INCIDENTS.find((i) => i.id === id)!;
-    setRuntimes((prev) => {
-      const fresh = seedRuntime(inc);
-      return { ...prev, [id]: { ...fresh, epoch: prev[id].epoch + 1 } };
-    });
-    pushAudit(id, "CIC", "REPLAY_STARTED", "rejeu d'incident — génération d'attaque synthétique");
-  }, [pushAudit]);
-
-  const setMode = useCallback((m: Mode) => {
-    if (m === modeRef.current) return;
-    setModeState(m);
-    pushAudit("—", "CIC", "MODE_SWITCH", `mode opérationnel → ${m}`);
-    if (m === "TRAINING") {
-      INCIDENTS.forEach((inc) => {
-        const rt = rtRef.current[inc.id];
-        if (rt && rt.phase === "WAITING_APPROVAL" && !rt.l1 && !rt.rejected) {
-          scheduleAutoGrant(inc.id, rt.epoch);
-        }
-      });
-    }
-  }, [pushAudit, scheduleAutoGrant]);
-
-  /* ---------------- incidents déjà en attente au chargement ---------------- */
-
-  useEffect(() => {
-    INCIDENTS.forEach((inc) => {
-      const rt = rtRef.current[inc.id];
-      if (rt && rt.phase === "WAITING_APPROVAL" && !rt.l1 && !rt.rejected) {
-        after(5200, () => scheduleAutoGrant(inc.id, rt.epoch));
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   /* ---------------- flux trafic live ---------------- */
 
@@ -406,7 +340,7 @@ export function useCIC() {
   }, []);
 
   return {
-    mode, setMode, runtimes, audit,
-    startAnalysis, approve, reject, escalate, modify, selectPlaybook, closeIncident, replay,
+    runtimes, audit,
+    startAnalysis, approve, reject, escalate, modify, selectPlaybook, closeIncident,
   };
 }

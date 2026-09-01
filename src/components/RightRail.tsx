@@ -1,4 +1,4 @@
-import type { Incident, Mode } from "../data/incidents";
+import type { Incident } from "../data/incidents";
 import { FORENSIC_FILES, SEVERITY_COLOR } from "../data/incidents";
 import { fakeSha256, type Runtime } from "../engine/useCIC";
 import {
@@ -90,7 +90,7 @@ function PlaybookPanel({ inc, rt, onSelect }: { inc: Incident; rt: Runtime; onSe
   const waiting = rt.phase === "WAITING_APPROVAL";
   return (
     <div className="panel panel-ticks p-3.5" style={{ ["--tick" as string]: TONE.ok }}>
-      <SectionTitle tone="ok">Playbooks & simulation</SectionTitle>
+      <SectionTitle tone="ok">Playbooks & modélisation</SectionTitle>
       <div className="mt-3 space-y-1.5">
         {inc.playbooks.map((p, i) => (
           <button
@@ -123,8 +123,8 @@ function PlaybookPanel({ inc, rt, onSelect }: { inc: Incident; rt: Runtime; onSe
 
       <div className="mt-3 border-t border-line/60 pt-2.5">
         <div className="flex items-center justify-between">
-          <span className="mono text-[9px] tracking-[0.18em] text-faint">PLAYBOOK SIMULATOR — {sel.id}</span>
-          <Chip label="SANDBOX ONLY" tone="sim" />
+          <span className="mono text-[9px] tracking-[0.18em] text-faint">MODÉLISATION PRÉ-EXÉCUTION — {sel.id}</span>
+          <Chip label="ESTIMATE ONLY" tone="sim" />
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mt-2.5">
           {[
@@ -159,9 +159,9 @@ function PlaybookPanel({ inc, rt, onSelect }: { inc: Incident; rt: Runtime; onSe
 }
 
 function ApprovalGate({
-  inc, rt, mode, onApprove, onReject, onEscalate, onModify,
+  inc, rt, onApprove, onReject, onEscalate, onModify,
 }: {
-  inc: Incident; rt: Runtime; mode: Mode;
+  inc: Incident; rt: Runtime;
   onApprove: (l: 1 | 2) => void; onReject: () => void; onEscalate: () => void; onModify: () => void;
 }) {
   const conf = confidenceOf(inc);
@@ -208,13 +208,10 @@ function ApprovalGate({
         </div>
       )}
 
-      {active && mode === "TRAINING" && !rt.l1 && !rt.rejected && (
-        <p className="mt-2.5 text-[10px] text-ai mono">
-          › TRAINING : auto-autorisation simulée imminente — devancez-la avec une approbation manuelle L1+L2.
+      {active && (
+        <p className="mt-2.5 text-[10px] text-risk">
+          Aucune auto-exécution : la double validation humaine (L1 + L2) est obligatoire avant tout impact sur un système réel.
         </p>
-      )}
-      {active && mode === "PRODUCTION" && (
-        <p className="mt-2.5 text-[10px] text-risk">PRODUCTION : double validation humaine obligatoire avant toute exécution.</p>
       )}
       {rt.rejected && active && (
         <div className="mt-2.5 border border-crit/50 bg-crit/10 px-2.5 py-2 flex items-center gap-2" style={{ borderRadius: 2 }}>
@@ -286,15 +283,15 @@ function ForensicPanel({ inc, rt }: { inc: Incident; rt: Runtime }) {
 }
 
 export function RightRail({
-  inc, rt, mode, onApprove, onReject, onEscalate, onModify, onSelectPlaybook,
+  inc, rt, onApprove, onReject, onEscalate, onModify, onSelectPlaybook,
 }: {
-  inc: Incident; rt: Runtime; mode: Mode;
+  inc: Incident; rt: Runtime;
   onApprove: (l: 1 | 2) => void; onReject: () => void; onEscalate: () => void; onModify: () => void;
   onSelectPlaybook: (i: number) => void;
 }) {
   return (
     <div className="space-y-3 min-w-0">
-      <ApprovalGate inc={inc} rt={rt} mode={mode} onApprove={onApprove} onReject={onReject} onEscalate={onEscalate} onModify={onModify} />
+      <ApprovalGate inc={inc} rt={rt} onApprove={onApprove} onReject={onReject} onEscalate={onEscalate} onModify={onModify} />
       <MitrePanel inc={inc} />
       <RiskPanel inc={inc} />
       <PlaybookPanel inc={inc} rt={rt} onSelect={onSelectPlaybook} />
@@ -316,7 +313,7 @@ export function RightRail({
           <span className="mono text-[9px] tracking-[0.16em] text-faint">APPRENTISSAGE CONTRÔLÉ</span>
         </div>
         <p className="text-[10.5px] text-faint mt-2 leading-relaxed">
-          Le système apprend des exercices (hypothèse correcte, playbook efficace, fausse alerte, capteur fiable,
+          Le système apprend des incidents clos (hypothèse confirmée, playbook efficace, fausse alerte, capteur fiable,
           correction humaine) — <span className="text-dim">jamais</span> d'apprentissage automatique direct sur une
           décision sensible sans validation.
         </p>

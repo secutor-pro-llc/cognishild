@@ -30,7 +30,7 @@ export default function App() {
       <div className="bg-noise" aria-hidden />
       <div className="scanline" aria-hidden />
 
-      <TopBar mode={cic.mode} onMode={cic.setMode} />
+      <TopBar />
       <PipelineStrip index={rt.pipelineIndex} phase={rt.phase} />
 
       <main className="max-w-[1760px] w-full mx-auto px-4 py-3 relative z-10 flex-1">
@@ -45,10 +45,8 @@ export default function App() {
             <CenterStage
               inc={inc}
               rt={rt}
-              mode={cic.mode}
               onStart={() => cic.startAnalysis(inc)}
               onClose={() => cic.closeIncident(inc.id)}
-              onReplay={() => cic.replay(inc.id)}
             />
           </section>
 
@@ -56,7 +54,6 @@ export default function App() {
             <RightRail
               inc={inc}
               rt={rt}
-              mode={cic.mode}
               onApprove={(l) => cic.approve(inc.id, l)}
               onReject={() => cic.reject(inc.id)}
               onEscalate={() => cic.escalate(inc.id)}
@@ -69,11 +66,11 @@ export default function App() {
         <div className="grid grid-cols-12 gap-3 mt-3 items-stretch">
           <div className="col-span-12 lg:col-span-5"><AuditLog audit={cic.audit} /></div>
           <div className="col-span-12 md:col-span-6 lg:col-span-4"><ScorePanel incidents={INCIDENTS} runtimes={cic.runtimes} /></div>
-          <div className="col-span-12 md:col-span-6 lg:col-span-3"><FinalStatus inc={inc} rt={rt} mode={cic.mode} /></div>
+          <div className="col-span-12 md:col-span-6 lg:col-span-3"><FinalStatus inc={inc} rt={rt} /></div>
         </div>
 
         <p className="mono text-[9px] text-faint mt-3 text-center tracking-[0.14em]">
-          RACCOURCIS : TOUCHES 1–4 — SÉLECTION D'INCIDENT · TOUS LES FLUX SONT SIMULÉS LOCALEMENT
+          RACCOURCIS : TOUCHES 1–4 — SÉLECTION D'INCIDENT · PRODUCTION VERROUILLÉ — AUCUNE AUTO-EXÉCUTION
         </p>
       </main>
 

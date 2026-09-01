@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import type { Mode, Phase } from "../data/incidents";
+import type { Phase } from "../data/incidents";
 import { PIPELINE_STAGES } from "../data/incidents";
-import { Chip, Led, ScrambleText, TONE } from "./ui";
+import { Chip, IcLock, Led, ScrambleText, TONE } from "./ui";
 
 function useClock() {
   const [t, setT] = useState("");
@@ -63,14 +63,14 @@ export function PipelineStrip({ index, phase }: { index: number; phase: Phase })
   );
 }
 
-export function TopBar({ mode, onMode }: { mode: Mode; onMode: (m: Mode) => void }) {
+export function TopBar() {
   const clock = useClock();
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-bg0/85 backdrop-blur-md">
       <div className="max-w-[1760px] mx-auto px-4 py-2.5 flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden>
-            <path d="M16 2 28 7v9c0 7.5-5.2 12.6-12 14C9.2 28.6 4 23.5 4 16V7l12-5z" fill="#0C1220" stroke="#B18CFF" strokeWidth="1.6" />
+            <path d="M16 2 28 7v9c0 7.5-5.2 12.6-12 14C9.2 28.6 4 23.5 4 16V7l12-5z" fill="#0C1220" stroke="#FF9040" strokeWidth="1.6" />
             <path d="M16 2 28 7v9c0 7.5-5.2 12.6-12 14" stroke="#58A6FF" strokeWidth="1.6" opacity="0.6" />
             <path d="m10 16 4 4 8-9" stroke="#3DDC97" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -94,50 +94,28 @@ export function TopBar({ mode, onMode }: { mode: Mode; onMode: (m: Mode) => void
             <div className="mono text-sm font-semibold text-ink tick-num leading-none">{clock}<span className="text-faint text-[9px] ml-1">UTC</span></div>
             <div className="mono text-[9px] text-faint tracking-[0.2em] mt-0.5">CIC v1.0 · FAIL CLOSED</div>
           </div>
-          <div className="flex border border-line rounded-[2px] overflow-hidden">
-            {(["TRAINING", "PRODUCTION"] as Mode[]).map((m) => (
-              <button
-                key={m}
-                onClick={() => onMode(m)}
-                className="mono text-[10px] font-semibold tracking-[0.16em] px-3 py-2 transition-colors cursor-pointer"
-                style={{
-                  background: mode === m ? (m === "TRAINING" ? "rgba(177,140,255,0.16)" : "rgba(255,144,64,0.16)") : "transparent",
-                  color: mode === m ? (m === "TRAINING" ? TONE.ai : TONE.risk) : "#5c7091",
-                }}
-              >
-                {m}
-              </button>
-            ))}
+          <div className="flex items-center gap-2 border border-risk/60 bg-risk/10 px-2.5 py-1.5" style={{ borderRadius: 2 }}>
+            <IcLock size={13} color={TONE.risk} />
+            <span className="disp text-[11px] font-bold tracking-[0.22em] text-risk">PRODUCTION</span>
           </div>
         </div>
       </div>
 
-      {mode === "TRAINING" ? (
-        <div className="border-t border-ai/25 bg-ai/8">
-          <div className="max-w-[1760px] mx-auto px-4 py-1.5 flex items-center gap-3 flex-wrap">
-            <span className="flex items-center gap-2">
-              <Led tone="ai" fast />
-              <span className="disp text-[10px] font-semibold tracking-[0.24em] text-ai">CYBER RANGE — TRAINING MODE</span>
-            </span>
-            <span className="mono text-[9px] tracking-[0.18em] text-dim">
-              SIMULATED TARGET · SIMULATED TRAFFIC · SIMULATED MITIGATION
-            </span>
-            <Chip label="SIMULATION — NO EXTERNAL ACTION" tone="sim" />
-          </div>
+      <div className="border-t border-risk/30 bg-risk/8">
+        <div className="max-w-[1760px] mx-auto px-4 py-1.5 flex items-center gap-3 flex-wrap">
+          <span className="flex items-center gap-2">
+            <Led tone="risk" fast />
+            <span className="disp text-[10px] font-semibold tracking-[0.24em] text-risk">LIVE OPERATIONS</span>
+          </span>
+          <span className="mono text-[9px] tracking-[0.14em] text-dim">
+            OBSERVE · ANALYZE · RECOMMEND · WAIT FOR AUTHORIZATION — toute action sur système réel exige une autorisation conforme
+          </span>
+          <span className="ml-auto flex items-center gap-2">
+            <Chip label="DOUBLE VALIDATION L1 + L2" tone="risk" />
+            <Chip label="FAIL CLOSED" tone="crit" />
+          </span>
         </div>
-      ) : (
-        <div className="border-t border-risk/30 bg-risk/8">
-          <div className="max-w-[1760px] mx-auto px-4 py-1.5 flex items-center gap-3 flex-wrap">
-            <span className="flex items-center gap-2">
-              <Led tone="risk" fast />
-              <span className="disp text-[10px] font-semibold tracking-[0.24em] text-risk">PRODUCTION MODE</span>
-            </span>
-            <span className="mono text-[9px] tracking-[0.18em] text-dim">
-              OBSERVE · ANALYZE · RECOMMEND · WAIT FOR AUTHORIZATION — toute action réelle exige une autorisation conforme
-            </span>
-          </div>
-        </div>
-      )}
+      </div>
     </header>
   );
 }

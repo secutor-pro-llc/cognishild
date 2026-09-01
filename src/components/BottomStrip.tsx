@@ -6,7 +6,7 @@ const actorTone = (actor: string): string => {
   if (actor.startsWith("HUMAN")) return "warn";
   if (actor.includes("POLICY")) return "crit";
   if (actor.includes("COUNTER") || actor === "CIC") return "ai";
-  if (actor.includes("SIMULATION")) return "sim";
+  if (actor.includes("CONSEQUENCE")) return "sim";
   if (actor.includes("EVIDENCE")) return "ok";
   if (actor.includes("EXECUTION")) return "risk";
   if (actor.includes("DETECTION")) return "ana";
@@ -47,10 +47,10 @@ export function ScorePanel({ incidents, runtimes }: { incidents: Incident[]; run
         <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6">
           <IcPulse size={26} color={TONE.faint} />
           <p className="text-[11px] text-faint text-center leading-relaxed px-4">
-            Aucun exercice terminé — le score est calculé après chaque rejeu Cyber Range
+            Aucune intervention achevée — le score de qualité de décision est évalué après chaque réponse réelle
             (détection, classification, faux positifs, réponse, risque collatéral, récupération, preuves).
           </p>
-          <div className="mono text-[9px] text-faint tracking-[0.2em]">EN ATTENTE D'EXERCICE</div>
+          <div className="mono text-[9px] text-faint tracking-[0.2em]">EN ATTENTE D'INTERVENTION</div>
         </div>
       </div>
     );
@@ -76,13 +76,13 @@ export function ScorePanel({ incidents, runtimes }: { incidents: Incident[]; run
       </div>
       <div className="mt-2.5 border-t border-line/60 pt-2 flex items-center justify-between">
         <span className="mono text-[9px] text-faint">{latest.id}</span>
-        <Chip label={rt.phase === "CLOSED" ? "EXERCICE CLOS" : "EXERCICE TERMINÉ"} tone="ai" />
+        <Chip label={rt.phase === "CLOSED" ? "INCIDENT CLOS" : "RÉPONSE ACHEVÉE"} tone="ai" />
       </div>
     </div>
   );
 }
 
-export function FinalStatus({ inc, rt, mode }: { inc: Incident; rt: Runtime; mode: string }) {
+export function FinalStatus({ inc, rt }: { inc: Incident; rt: Runtime }) {
   const finished = ["RECOVERED", "CLOSED"].includes(rt.phase);
   return (
     <div className="panel p-3.5 h-full flex flex-col">
@@ -91,12 +91,12 @@ export function FinalStatus({ inc, rt, mode }: { inc: Incident; rt: Runtime; mod
         <div className="mt-3 flex-1">
           <div className="disp text-[13px] font-bold tracking-[0.08em] text-ok flex items-center gap-2">
             <IcShield size={15} color={TONE.ok} />
-            {mode === "TRAINING" ? "TRAINING EXERCISE COMPLETED" : "INCIDENT CONTAINED"}
+            {rt.phase === "CLOSED" ? "INCIDENT CLOSED" : "INCIDENT CONTAINED"}
           </div>
           <p className="text-[11px] text-dim mt-2 leading-relaxed">
-            {mode === "TRAINING"
-              ? "Scénario de menace mitigé avec succès. Aucune infrastructure externe impactée."
-              : "Service restauré. Surveillance renforcée active. Preuves préservées."}
+            {rt.phase === "CLOSED"
+              ? "Clôture définitive après fenêtre d'observation. Preuves scellées, surveillance renforcée maintenue 24 h."
+              : "Service restauré. Surveillance renforcée active. Preuves préservées. Clôture définitive en attente de la fenêtre d'observation."}
           </p>
           <div className="mt-2.5 space-y-1 mono text-[10px]">
             <div className="flex justify-between"><span className="text-faint">Confidence</span><span className="text-ana">{(inc.confidenceFactors.reduce((s, f) => s + f.weight * f.value, 0) * 100).toFixed(1)} %</span></div>
@@ -140,7 +140,7 @@ export function Footer() {
           ))}
         </div>
         <span className="ml-auto mono text-[9px] text-faint">
-          COGNISHIELD CIC v1.0 — défense & réponse sur autorisation — démo fonctionnelle
+          COGNISHIELD CIC v1.0 — défense & réponse réelles sur double autorisation
         </span>
       </div>
     </footer>

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import type { Incident, Mode, Phase } from "../data/incidents";
+import type { Incident, Phase } from "../data/incidents";
 import { NEUTRALIZATION, PHASES, PHASE_LABEL, SEVERITY_COLOR } from "../data/incidents";
 import type { Runtime } from "../engine/useCIC";
 import {
-  Bar, Chip, confidenceOf, IcArrow, IcBranch, IcCheck, IcEye, IcFlask, IcGavel,
+  Bar, Chip, confidenceOf, IcArrow, IcBranch, IcCheck, IcEye, IcGavel,
   IcPulse, IcQuestion, IcRadar, IcScale, ScrambleText, SectionTitle, TONE, riskOf,
 } from "./ui";
 
@@ -11,7 +11,7 @@ const sevTone = (s: string) => (s === "CRITICAL" ? "crit" : s === "HIGH" ? "risk
 
 /* ---------------- header : fiche incident ---------------- */
 
-function IncidentHeader({ inc, rt, mode }: { inc: Incident; rt: Runtime; mode: Mode }) {
+function IncidentHeader({ inc, rt }: { inc: Incident; rt: Runtime }) {
   const { cls } = riskOf(inc);
   const conf = confidenceOf(inc);
   const meta: [string, ReactNode][] = [
@@ -22,7 +22,7 @@ function IncidentHeader({ inc, rt, mode }: { inc: Incident; rt: Runtime; mode: M
     ["Criticité", <Chip key="c" label={cls} tone={sevTone(cls)} />],
     ["Confiance", <span key="cf" className="mono text-ana font-semibold">{(conf * 100).toFixed(1)} %</span>],
     ["État", <Chip key="e" label={PHASE_LABEL[rt.phase]} tone="warn" />],
-    ["Mode", <Chip key="m" label={mode} tone={mode === "TRAINING" ? "ai" : "risk"} />],
+    ["Mode", <Chip key="m" label="PRODUCTION" tone="risk" />],
   ];
   return (
     <div className="panel panel-ticks p-4" style={{ ["--tick" as string]: SEVERITY_COLOR[cls] }}>
@@ -395,20 +395,18 @@ function Timeline({ rt }: { rt: Runtime }) {
 /* ---------------- stage central ---------------- */
 
 export function CenterStage({
-  inc, rt, mode, onStart, onClose, onReplay,
+  inc, rt, onStart, onClose,
 }: {
   inc: Incident;
   rt: Runtime;
-  mode: Mode;
   onStart: () => void;
   onClose: () => void;
-  onReplay: () => void;
 }) {
   const canStart = ["DETECTED", "ANALYZING"].includes(rt.phase) && !rt.running;
   const startLabel = rt.phase === "DETECTED" ? "Initier l'analyse cognitive" : "Reprendre le pipeline cognitif";
   return (
     <div className="space-y-3 min-w-0">
-      <IncidentHeader inc={inc} rt={rt} mode={mode} />
+      <IncidentHeader inc={inc} rt={rt} />
 
       <div className="flex gap-3 flex-wrap">
         <Assessment inc={inc} rt={rt} />
@@ -444,17 +442,10 @@ export function CenterStage({
           </span>
         )}
         {rt.phase === "RECOVERED" && (
-          <>
-            <button className="btn btn-ok flex items-center gap-2" onClick={onClose}><IcCheck size={13} /> Clore l'incident</button>
-            <button className="btn btn-ai flex items-center gap-2" onClick={onReplay} disabled={mode !== "TRAINING"}>
-              <IcFlask size={13} /> Rejouer (training)
-            </button>
-          </>
+          <button className="btn btn-ok flex items-center gap-2" onClick={onClose}><IcCheck size={13} /> Clore l'incident</button>
         )}
         {rt.phase === "CLOSED" && (
-          <button className="btn btn-ai flex items-center gap-2" onClick={onReplay} disabled={mode !== "TRAINING"}>
-            <IcFlask size={13} /> Rejouer (training)
-          </button>
+          <span className="mono text-[9.5px] tracking-[0.18em] text-faint">INCIDENT CLOS — SURVEILLANCE RENFORCÉE MAINTENUE 24 H</span>
         )}
         {rt.phase === "MITIGATING" && (
           <span className="btn flex items-center gap-2" style={{ cursor: "default", opacity: 0.7 }}>

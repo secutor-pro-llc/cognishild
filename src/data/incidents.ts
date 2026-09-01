@@ -1,4 +1,3 @@
-export type Mode = "TRAINING" | "PRODUCTION";
 export type Severity = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO";
 
 export interface PlaybookSim {
@@ -74,7 +73,7 @@ export const SEVERITY_COLOR: Record<Severity, string> = {
 export const PIPELINE_STAGES = [
   "EVENT", "INGESTION", "NORMALISATION", "CORRELATION", "CLASSIFICATION",
   "THREAT HYPOTHESES", "COUNTER-ANALYSIS", "CONFIDENCE SCORING", "MITRE MAPPING",
-  "ASSET CRITICALITY", "IMPACT ANALYSIS", "PLAYBOOK MATCHING", "PLAYBOOK SIMULATION",
+  "ASSET CRITICALITY", "IMPACT ANALYSIS", "PLAYBOOK MATCHING", "CONSEQUENCE MODELING",
   "COLLATERAL RISK", "RECOMMENDATION", "HUMAN APPROVAL", "EXECUTION",
   "POST-EXEC VALIDATION", "FORENSIC SNAPSHOT", "AUDIT",
 ];
@@ -116,7 +115,7 @@ export const AGENTS = [
   { name: "MITRE Mapper", priv: "READ ONLY", tone: "ana" },
   { name: "Risk Analyst", priv: "READ ONLY", tone: "warn" },
   { name: "Playbook Selector", priv: "RECOMMEND ONLY", tone: "ok" },
-  { name: "Simulation Agent", priv: "SANDBOX ONLY", tone: "sim" },
+  { name: "Consequence Modeler", priv: "ESTIMATE ONLY", tone: "sim" },
   { name: "Policy Guard", priv: "ALLOW / DENY", tone: "crit" },
   { name: "Execution Engine", priv: "RESTRICTED", tone: "risk" },
   { name: "Evidence Agent", priv: "WRITE APPEND ONLY", tone: "ok" },
@@ -287,7 +286,7 @@ export const INCIDENTS: Incident[] = [
       ["00:14:59", "Hypothèse principale : Credential Stuffing — 84.2 %", "ai"],
       ["00:15:02", "MITRE mapping : TA0006 / T1110.004", "ai"],
       ["00:15:04", "PB-AUTH-03 sélectionné (match 91 %)", "sim"],
-      ["00:15:05", "Simulation : efficacité 92 % — risque collatéral MEDIUM", "sim"],
+      ["00:15:05", "Modélisation pré-exécution : efficacité 92 % — risque collatéral MEDIUM", "sim"],
       ["00:15:06", "Human Approval Gate armé — double validation requise", "warn"],
     ],
     seedApprovals: { l1: false, l2: false },
