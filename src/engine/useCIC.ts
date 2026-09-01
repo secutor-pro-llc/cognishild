@@ -109,11 +109,12 @@ const SEED_AUDIT: Omit<AuditEntry, "id">[] = [
   { time: "00:15:06", incident: "INC-20260901-000172", actor: "POLICY_GUARD", action: "APPROVAL_GATE_ARMED", detail: "double validation requise (L1 + L2) — FAIL CLOSED", mode: "PRODUCTION" },
   { time: "00:15:05", incident: "INC-20260901-000172", actor: "SIMULATION_ANALYST", action: "SIMULATION_COMPLETED", detail: "PB-AUTH-03 — effectiveness 0.92 — collateral MEDIUM", mode: "PRODUCTION" },
   { time: "00:14:52", incident: "INC-20260901-000172", actor: "DETECTION_ANALYST", action: "INCIDENT_CREATED", detail: "IdP — 18 400 tentatives / 9 min — ratio échec 96 %", mode: "PRODUCTION" },
-  { time: "00:05:00", incident: "—", actor: "CIC", action: "SYSTEM_READY", detail: "Policy Guard armé — fail closed — LLM sans privilège d'exécution", mode: "TRAINING" },
+  { time: "00:05:00", incident: "—", actor: "CIC", action: "SYSTEM_READY", detail: "Policy Guard armé — fail closed — LLM sans privilège d'exécution", mode: "PRODUCTION" },
+  { time: "00:05:01", incident: "—", actor: "POLICY_GUARD", action: "MODE_ARMED", detail: "PRODUCTION — double validation humaine obligatoire — aucune auto-exécution", mode: "PRODUCTION" },
 ];
 
 export function useCIC() {
-  const [mode, setModeState] = useState<Mode>("TRAINING");
+  const [mode, setModeState] = useState<Mode>("PRODUCTION");
   const [runtimes, setRuntimes] = useState<Record<string, Runtime>>(() => {
     const m: Record<string, Runtime> = {};
     INCIDENTS.forEach((i) => { m[i.id] = seedRuntime(i); });
