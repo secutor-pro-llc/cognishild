@@ -6,6 +6,7 @@ import { AgentsPanel, IncidentQueue, Kpis } from "./components/LeftRail";
 import { CenterStage } from "./components/CenterStage";
 import { RightRail } from "./components/RightRail";
 import { AuditLog, FinalStatus, Footer, ScorePanel } from "./components/BottomStrip";
+import { OnionSearchPanel } from "./components/OnionSearchPanel";
 
 export default function App() {
   const cic = useCIC();
@@ -38,6 +39,7 @@ export default function App() {
           <aside className="col-span-12 md:col-span-6 lg:col-span-3 space-y-3 order-2 lg:order-1">
             <Kpis incidents={INCIDENTS} runtimes={cic.runtimes} />
             <IncidentQueue incidents={INCIDENTS} runtimes={cic.runtimes} selected={inc.id} onSelect={setSelectedId} />
+            <OnionSearchPanel />
             <AgentsPanel />
           </aside>
 

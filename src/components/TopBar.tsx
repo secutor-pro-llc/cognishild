@@ -81,7 +81,7 @@ export function TopBar() {
         </div>
 
         <div className="hidden md:flex items-center gap-4 ml-4">
-          {[["SIEM", "ok"], ["EDR", "ok"], ["WAF", "warn"], ["CTI", "ok"]].map(([n, t]) => (
+          {[["SIEM", "ok"], ["EDR", "ok"], ["WAF", "warn"], ["CTI", "ok"], ["DARKNET", "risk"]].map(([n, t]) => (
             <span key={n} className="flex items-center gap-1.5">
               <Led tone={t} />
               <span className="mono text-[9px] tracking-[0.18em] text-dim">{n}</span>

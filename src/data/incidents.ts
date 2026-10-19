@@ -120,6 +120,7 @@ export const AGENTS = [
   { name: "Execution Engine", priv: "RESTRICTED", tone: "risk" },
   { name: "Evidence Agent", priv: "WRITE APPEND ONLY", tone: "ok" },
   { name: "Report Agent", priv: "WRITE APPEND ONLY", tone: "sim" },
+  { name: "Darknet Intel Analyst", priv: "OSINT READ ONLY", tone: "risk" },
 ];
 
 export const FORENSIC_FILES = [

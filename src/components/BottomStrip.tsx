@@ -140,7 +140,7 @@ export function Footer() {
           ))}
         </div>
         <span className="ml-auto mono text-[9px] text-faint">
-          COGNISHIELD CIC v1.0 — défense & réponse réelles sur double autorisation
+          COGNISHIELD CIC v1.0 · OSINT : OnionSearch · défense & réponse réelles sur double autorisation
         </span>
       </div>
     </footer>
