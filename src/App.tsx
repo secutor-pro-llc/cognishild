@@ -7,6 +7,10 @@ import { CenterStage } from "./components/CenterStage";
 import { RightRail } from "./components/RightRail";
 import { AuditLog, FinalStatus, Footer, ScorePanel } from "./components/BottomStrip";
 import { OnionSearchPanel } from "./components/OnionSearchPanel";
+import { URLAnalysisPanel } from "./components/URLAnalysisPanel";
+import { IPAnalysisPanel } from "./components/IPAnalysisPanel";
+import { SubmissionPanel } from "./components/SubmissionPanel";
+import { APIPanel } from "./components/APIPanel";
 
 export default function App() {
   const cic = useCIC();
@@ -39,6 +43,7 @@ export default function App() {
           <aside className="col-span-12 md:col-span-6 lg:col-span-3 space-y-3 order-2 lg:order-1">
             <Kpis incidents={INCIDENTS} runtimes={cic.runtimes} />
             <IncidentQueue incidents={INCIDENTS} runtimes={cic.runtimes} selected={inc.id} onSelect={setSelectedId} />
+            <SubmissionPanel />
             <OnionSearchPanel />
             <AgentsPanel />
           </aside>
@@ -63,6 +68,12 @@ export default function App() {
               onSelectPlaybook={(i) => cic.selectPlaybook(inc.id, i)}
             />
           </aside>
+        </div>
+
+        <div className="grid grid-cols-12 gap-3 mt-3 items-stretch">
+          <div className="col-span-12 md:col-span-6 lg:col-span-4"><URLAnalysisPanel /></div>
+          <div className="col-span-12 md:col-span-6 lg:col-span-4"><IPAnalysisPanel /></div>
+          <div className="col-span-12 lg:col-span-4"><APIPanel /></div>
         </div>
 
         <div className="grid grid-cols-12 gap-3 mt-3 items-stretch">
